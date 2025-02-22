@@ -1,7 +1,24 @@
 [package]
 name = "spz_rs"
+description = "Rust code for reading in Gaussian Splats stored in the Niantic .spz file format."
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/abroun/spz_rs"
+readme = "README.md"
+keywords = [
+  "gaussian-splatting",
+  "ply",
+  "spz",
+]
+categories = [
+  "graphics",
+  "rendering",
+  "rendering::data-formats",
+]
+exclude = [
+    "3rd_party",
+]
 
 [dependencies]
 flate2 = "1.0.35"
