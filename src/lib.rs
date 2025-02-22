@@ -1,9 +1,10 @@
 // Translated from the Niantic C++ reference implementation at https://github.com/nianticlabs/spz
 // Provides support for loading in Gaussian splats stored in the Niantic .spz format
 
-//  Copyright (c) 2023 Alan Broun, Beholder Vision Ltd
+//  Copyright (c) 2025 Alan Broun, Beholder Vision Ltd
 
-use std::io::Read;
+use std::fs;
+use std::io;
 use std::mem;
 
 use flate2::read::GzDecoder;
@@ -221,7 +222,7 @@ impl PackedGaussians {
     }
 }
 
-pub fn deserialize_packed_gaussians<R: Read>(mut reader: R) -> Result<PackedGaussians, std::io::Error> {
+pub fn load_packed_gaussians_from_decompressed_buffer<R: io::Read>(mut reader: R) -> Result<PackedGaussians, std::io::Error> {
     let header: PackedGaussiansHeader = {   // From https://users.rust-lang.org/t/read-into-struct/30972/4
         let mut h = [0u8; size_of::<PackedGaussiansHeader>()];
         reader.read_exact(&mut h[..])?;
@@ -263,8 +264,15 @@ pub fn deserialize_packed_gaussians<R: Read>(mut reader: R) -> Result<PackedGaus
     Ok(result)
 }
 
-pub fn load_packed_gaussians_from_spz_buffer(buffer: Vec<u8>) -> Result<PackedGaussians, std::io::Error> {
+pub fn load_packed_gaussians_from_spz_buffer<R: io::Read>(reader: R) -> Result<PackedGaussians, std::io::Error> {
 
-    let gz_decoder = GzDecoder::new(buffer.as_slice());
-    deserialize_packed_gaussians(gz_decoder)
+    let gz_decoder = GzDecoder::new(reader);
+    load_packed_gaussians_from_decompressed_buffer(gz_decoder)
+}
+
+pub fn load_packed_gaussians_from_file(filename: &String) -> Result<PackedGaussians, std::io::Error> {
+
+    let file = fs::File::open(filename)?;
+    let reader = io::BufReader::new(file);
+    load_packed_gaussians_from_spz_buffer(reader)
 }
